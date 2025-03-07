@@ -1,46 +1,43 @@
 document.addEventListener("DOMContentLoaded", () => {
     const taskInput = document.getElementById("taskInput");
-    const addTaskBtn = document.getElementById("addTask");
+    const addTaskBtn = document.getElementById("addTaskBtn");
     const taskList = document.getElementById("taskList");
 
+    function fetchTasks() {
+        fetch("/api/tasks")
+            .then(res => res.json())
+            .then(data => {
+                taskList.innerHTML = "";
+                data.tasks.forEach(task => {
+                    let li = document.createElement("li");
+                    li.textContent = task.description;
+                    
+                    if (task.completed) {
+                        li.style.textDecoration = "line-through";
+                    }
+
+                    li.addEventListener("click", () => completeTask(task.id));
+                    taskList.appendChild(li);
+                });
+            });
+    }
+
     function addTask() {
-        const taskText = taskInput.value.trim();
-        if (taskText === "") return;
-
-        const taskItem = document.createElement("li");
-        taskItem.classList.add("task");
-        taskItem.innerHTML = `
-            <span class="task-text">${taskText}</span>
-            <button class="complete-task">✔</button>
-            <button class="delete-task">✖</button>
-        `;
-
-        taskList.appendChild(taskItem);
-        taskInput.value = "";
-        playSound("static/media/add-sound.mp3");
-
-        // Add event listeners to buttons
-        taskItem.querySelector(".complete-task").addEventListener("click", () => completeTask(taskItem));
-        taskItem.querySelector(".delete-task").addEventListener("click", () => deleteTask(taskItem));
+        fetch("/api/task", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ description: taskInput.value })
+        }).then(() => {
+            taskInput.value = "";
+            fetchTasks();
+        });
     }
 
-    function completeTask(taskItem) {
-        taskItem.classList.toggle("completed");
-        playSound("static/media/complete-sound.mp3");
-    }
-
-    function deleteTask(taskItem) {
-        taskItem.remove();
-        playSound("static/media/delete-sound.mp3");
-    }
-
-    function playSound(file) {
-        let sound = new Audio(file);
-        sound.play();
+    function completeTask(id) {
+        fetch(`/api/task/${id}`, { method: "PUT" })
+            .then(() => fetchTasks());
     }
 
     addTaskBtn.addEventListener("click", addTask);
-    taskInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") addTask();
-    });
+    fetchTasks();
 });

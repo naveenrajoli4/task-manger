@@ -1,166 +1,21 @@
-// Task Manager App - Backend + Frontend + Systemd Service
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <h1>Task Manager</h1>
 
-// 1. Database Config (DbConfig.js)
-module.exports = Object.freeze({
-    DB_HOST: '',  // MySQL Server IP
-    DB_USER: 'task_user',      // MySQL user for the task app
-    DB_PWD: 'Naveen@123',    // MySQL password
-    DB_DATABASE: 'task_db'     // Task database name
-});
+    <div>
+        <input type="text" id="taskInput" placeholder="Enter task...">
+        <button id="addTaskBtn">Add Task</button>
+    </div>
 
-// 2. Backend (index.js)
-const taskService = require('./TaskService');
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+    <ul id="taskList"></ul>
 
-const app = express();
-const port = 8081;
-
-app.use(bodyParser.json());
-app.use(cors());
-
-// Health Check
-app.get('/health', (req, res) => {
-    res.json("Task Manager is running");
-});
-
-// Add Task
-app.post('/task', (req, res) => {
-    taskService.addTask(req.body.description, function (success) {
-        success ? res.json({ message: 'Task added' }) : res.status(400).json({ message: 'Error adding task' });
-    });
-});
-
-// Get All Tasks
-app.get('/tasks', (req, res) => {
-    taskService.getAllTasks((results) => res.status(200).json({ tasks: results }));
-});
-
-// Complete Task
-app.put('/task/:id', (req, res) => {
-    taskService.completeTask(req.params.id, (success) => {
-        success ? res.json({ message: 'Task completed' }) : res.status(400).json({ message: 'Error completing task' });
-    });
-});
-
-// Delete Task
-app.delete('/task/:id', (req, res) => {
-    taskService.deleteTask(req.params.id, (success) => {
-        success ? res.json({ message: 'Task deleted' }) : res.status(400).json({ message: 'Error deleting task' });
-    });
-});
-
-app.listen(port, () => {
-    console.log(`Task Manager App Started on Port ${port}`);
-});
-
-// 3. Task Service (TaskService.js)
-const dbcreds = require('./DbConfig');
-const mysql = require('mysql2');
-
-const con = mysql.createConnection({
-    host: dbcreds.DB_HOST,
-    user: dbcreds.DB_USER,
-    password: dbcreds.DB_PWD,
-    database: dbcreds.DB_DATABASE
-});
-
-function addTask(description, callback) {
-    con.query(`INSERT INTO tasks (description, completed) VALUES (?, 0)`, [description], (err) => {
-        err ? callback(false) : callback(true);
-    });
-}
-
-function getAllTasks(callback) {
-    con.query("SELECT * FROM tasks", (err, result) => {
-        err ? callback([]) : callback(result);
-    });
-}
-
-function completeTask(id, callback) {
-    con.query("UPDATE tasks SET completed = 1 WHERE id = ?", [id], (err) => {
-        err ? callback(false) : callback(true);
-    });
-}
-
-function deleteTask(id, callback) {
-    con.query("DELETE FROM tasks WHERE id = ?", [id], (err) => {
-        err ? callback(false) : callback(true);
-    });
-}
-
-module.exports = { addTask, getAllTasks, completeTask, deleteTask };
-
-// 4. Systemd Service (taskmanager.service)
-// [Unit]
-// Description=Task Manager Service
-// After=network.target
-//
-// [Service]
-// User=taskuser
-// WorkingDirectory=/opt/task_manager
-// Environment=DB_HOST="<sql_private_ip>"
-// ExecStart=/bin/node /opt/task_manager/index.js
-// Restart=always
-// SyslogIdentifier=taskmanager
-// StandardOutput=syslog
-// StandardError=syslog
-//
-// [Install]
-// WantedBy=multi-user.target
-
-// 5. Frontend (index.html)
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Task Manager</title>
-//     <link rel="stylesheet" href="static/css/style.css">
-// </head>
-// <body>
-//     <h1>Task Manager</h1>
-//     <input type="text" id="taskInput" placeholder="Enter task...">
-//     <button id="addTask">Add Task</button>
-//     <ul id="taskList"></ul>
-//     <script src="static/js/task.js"></script>
-// </body>
-// </html>
-
-// 6. Frontend Logic (task.js)
-// document.addEventListener("DOMContentLoaded", () => {
-//     const taskInput = document.getElementById("taskInput");
-//     const addTaskBtn = document.getElementById("addTask");
-//     const taskList = document.getElementById("taskList");
-// 
-//     function fetchTasks() {
-//         fetch("http://localhost:8081/tasks")
-//             .then(res => res.json())
-//             .then(data => {
-//                 taskList.innerHTML = "";
-//                 data.tasks.forEach(task => {
-//                     let li = document.createElement("li");
-//                     li.textContent = task.description;
-//                     if (task.completed) li.style.textDecoration = "line-through";
-//                     li.addEventListener("click", () => completeTask(task.id));
-//                     taskList.appendChild(li);
-//                 });
-//             });
-//     }
-// 
-//     function addTask() {
-//         fetch("http://localhost:8081/task", {
-//             method: "POST",
-//             headers: { "Content-Type": "application/json" },
-//             body: JSON.stringify({ description: taskInput.value })
-//         }).then(() => { taskInput.value = ""; fetchTasks(); });
-//     }
-// 
-//     function completeTask(id) {
-//         fetch(`http://localhost:8081/task/${id}`, { method: "PUT" }).then(fetchTasks);
-//     }
-// 
-//     addTaskBtn.addEventListener("click", addTask);
-//     fetchTasks();
-// });
+    <script src="static/js/task.js"></script>
+</body>
+</html>
