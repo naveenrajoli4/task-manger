@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-gap: 10px;
+    justify-content: center;
+    margin: 20px auto;
+}
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Colors for X and O */
+.cell.X { color: blue; }
+.cell.O { color: red; }
+
+/* Button Styles */
+button {
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Icons */
+.task-icon {
+    width: 24px;
+    height: 24px;
+    background: url('../media/task-icon.png') no-repeat center;
+    background-size: contain;
+    display: inline-block;
+}
+
+.complete-icon {
+    width: 24px;
+    height: 24px;
+    background: url('../media/complete-icon.png') no-repeat center;
+    background-size: contain;
+    display: inline-block;
+}
+
+.delete-icon {
+    width: 24px;
+    height: 24px;
+    background: url('../media/delete-icon.png') no-repeat center;
+    background-size: contain;
+    display: inline-block;
+}
